@@ -58,6 +58,7 @@ PR: https://github.com/user/repo/pull/123
 ## ✨ Features
 
 - 🤖 **Continuous Operation**: Runs 24/7 daemon, always ready for new tasks
+- 🐳 **Docker Ready**: Fully containerized with Railway deployment support
 - 💬 **Slack Integration**: Submit tasks via Slack commands
 - 🎯 **Hybrid Autonomy**: Auto-applies random thoughts, requires review for serious tasks
 - ⚡ **Smart Scheduling**: Optimizes task execution based on priorities
@@ -76,7 +77,26 @@ PR: https://github.com/user/repo/pull/123
 
 ## 🚀 Quick Start
 
-### 1. Install
+### Option 1: Deploy with Docker/Railway (Recommended for 24/7)
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)
+
+Deploy as a Docker container on Railway for true 24/7 operation:
+
+```bash
+# Quick Deploy to Railway:
+# 1. Click the button above or visit Railway dashboard
+# 2. Connect your repo and set SLACK_BOT_TOKEN and SLACK_APP_TOKEN
+# 3. Add a volume at /app/workspace (recommended)
+# 4. Deploy!
+
+# Or test locally with Docker:
+docker-compose up -d
+```
+
+**See [DEPLOY.md](./DEPLOY.md) for full deployment guide.**
+
+### Option 2: Local Installation
 
 ```bash
 pip install sleepless-agent

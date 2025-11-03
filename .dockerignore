@@ -1,0 +1,73 @@
+# Git files
+.git
+.github
+.gitignore
+
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Documentation
+docs/
+*.md
+!README.md
+mkdocs.yml
+site/
+
+# Workspace (will be created in container)
+workspace/
+
+# Environment files (secrets should be passed via Railway env vars)
+.env
+.env.*
+!.env.example
+
+# Assets
+assets/
+
+# Makefile
+Makefile
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore

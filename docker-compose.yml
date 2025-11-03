@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  sleepless-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sleepless-agent
+    restart: unless-stopped
+    environment:
+      # Slack Configuration (required)
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
+
+      # Claude Code Configuration
+      - CLAUDE_CODE_BINARY_PATH=/usr/local/bin/claude
+
+      # Agent Configuration
+      - AGENT_WORKSPACE_ROOT=/app/workspace
+      - AGENT_DB_PATH=/app/workspace/data/tasks.db
+      - AGENT_RESULTS_PATH=/app/workspace/data/results
+
+      # Git Configuration
+      - GIT_USER_NAME=${GIT_USER_NAME:-Sleepless Agent}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-agent@sleepless.local}
+
+      # Optional Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-false}
+    volumes:
+      # Persist workspace data
+      - workspace_data:/app/workspace
+      # Optional: Mount SSH keys for Git operations
+      # - ~/.ssh:/root/.ssh:ro
+      # Optional: Mount GitHub token for gh CLI
+      # - ~/.config/gh:/root/.config/gh:ro
+    # ports:
+    #   - "8080:8080"  # Only needed if you add webhook support
+    healthcheck:
+      test: ["CMD", "sle", "check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  workspace_data:
+    driver: local

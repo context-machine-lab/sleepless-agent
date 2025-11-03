@@ -1,0 +1,12 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "sle daemon"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Health check configuration
+healthcheckPath = "/"
+healthcheckTimeout = 300
