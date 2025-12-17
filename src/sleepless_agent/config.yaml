@@ -8,6 +8,7 @@ claude_code:
   usage_command: claude /usage
 
 git:
+  enabled: false  # Set to true to enable git commits and branching
   use_remote_repo: true
   remote_repo_url: git@github.com:TimeLovercc/test5.git # !!!CHANGE THIS!!!
   auto_create_repo: true

@@ -100,16 +100,21 @@ class SleeplessAgent:
         )
 
         auto_create_repo = git_config.get("auto_create_repo", False) if git_config else False
+        git_enabled = git_config.get("enabled", True) if git_config else True
         self.git = GitManager(
             workspace_root=str(self.config.agent.workspace_root),
             auto_create_repo=auto_create_repo,
+            enabled=git_enabled,
         )
-        self.git.init_repo()
-        if self.use_remote_repo and self.remote_repo_url:
-            try:
-                self.git.configure_remote(self.remote_repo_url)
-            except Exception as exc:  # pragma: no cover - defensive
-                logger.error(f"Failed to configure remote repository: {exc}")
+        if git_enabled:
+            self.git.init_repo()
+            if self.use_remote_repo and self.remote_repo_url:
+                try:
+                    self.git.configure_remote(self.remote_repo_url)
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.error(f"Failed to configure remote repository: {exc}")
+        else:
+            logger.info("git.disabled", message="Git integration is disabled")
 
         self.monitor = HealthMonitor(
             db_path=str(self.config.agent.db_path),

@@ -21,11 +21,19 @@ def parse_task_description(description: str) -> Tuple[str, Optional[str], Option
     working = description.strip()
     project_name: Optional[str] = None
 
-    # Extract --project= flag if present
-    project_match = re.search(r"--project=(\S+)", working)
-    if project_match:
-        project_name = project_match.group(1)
-        working = working.replace(project_match.group(0), "").strip()
+    # Extract project flag in various formats:
+    # -p value, -p=value, --project value, --project=value
+    project_patterns = [
+        r"--project[=\s]+(\S+)",  # --project=xxx or --project xxx
+        r"-p[=\s]+(\S+)",          # -p=xxx or -p xxx
+    ]
+
+    for pattern in project_patterns:
+        project_match = re.search(pattern, working)
+        if project_match:
+            project_name = project_match.group(1)
+            working = working.replace(project_match.group(0), "").strip()
+            break
 
     # Handle legacy flags
     if "--serious" in working:

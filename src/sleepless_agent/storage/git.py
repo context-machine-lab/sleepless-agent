@@ -20,11 +20,13 @@ class GitManager:
         default_task_branch: str = "tasks",
         main_branch: str = "main",
         auto_create_repo: bool = False,
+        enabled: bool = True,
     ):
         self.repo_path = Path(workspace_root).resolve()
         self.default_task_branch = default_task_branch
         self.main_branch = main_branch
         self.auto_create_repo = auto_create_repo
+        self.enabled = enabled
         self._push_warning_logged = False
 
     # ------------------------------------------------------------------
@@ -32,12 +34,15 @@ class GitManager:
     # ------------------------------------------------------------------
     def init_repo(self) -> bool:
         """Ensure workspace repo exists with an initial commit."""
+        if not self.enabled:
+            return True  # Skip git operations when disabled
         try:
             self.repo_path.mkdir(parents=True, exist_ok=True)
 
             repo_initialized = False
             if not self._repo_exists():
-                self._run_git("init")
+                # Use -b to set initial branch name (avoids master/main mismatch)
+                self._run_git("init", "-b", self.main_branch)
                 self._run_git("config", "user.email", "agent@sleepless.local")
                 self._run_git("config", "user.name", "Sleepless Agent")
                 repo_initialized = True
@@ -83,6 +88,8 @@ class GitManager:
         message: str,
     ) -> Optional[str]:
         """Commit files from a task workspace into branch, merge to main, and push."""
+        if not self.enabled:
+            return None  # Skip git operations when disabled
         self.init_repo()
         self.ensure_branch(branch)
 
@@ -218,6 +225,8 @@ class GitManager:
     # ------------------------------------------------------------------
     def validate_changes(self, workspace: Path, files: List[str]) -> Tuple[bool, str]:
         """Validate a set of files before committing."""
+        if not self.enabled:
+            return True, ""  # Skip validation when git is disabled
         issues: List[str] = []
 
         for file in files:
