@@ -117,6 +117,14 @@ class ProPlanUsageChecker:
                 logger.warning("usage.command.empty_output")
                 return self._fallback_usage()
 
+            # Detect API plan: no usage data is available, only a welcome screen.
+            if self._is_api_plan_response(cleaned_output):
+                logger.debug("usage.api_plan.not_supported")
+                fallback = (0.0, None)
+                self.cached_usage = fallback
+                self.last_check_time = datetime.now(timezone.utc).replace(tzinfo=None)
+                return fallback
+
             # Parse output
             try:
                 usage_percent, reset_time = self._parse_usage_output(cleaned_output)
@@ -346,6 +354,34 @@ class ProPlanUsageChecker:
         cleaned_lines = [line for line in lines if line.strip()]
 
         return "\n".join(cleaned_lines)
+
+    @staticmethod
+    def _is_api_plan_response(output: str) -> bool:
+        """Return True when output looks like the API-plan welcome screen.
+
+        When Claude Code is authenticated via an API key rather than a Pro
+        subscription, ``claude /usage`` prints a welcome/tips page instead of
+        usage statistics.  Detecting this avoids spurious parse-failure warnings.
+        """
+        api_indicators = [
+            r"Claude\s+Code\s+v\d+",
+            r"Tips\s+for\s+getting\s+started",
+            r"Welcome\s+to\s+Claude",
+        ]
+        usage_indicators = [
+            r"\d+(?:\.\d+)?\s*%\s*(?:used|usage|remaining)",
+            r"used\s+\d+\s+of\s+\d+\s+messages",
+            r"Messages?\s*:\s*\d+\s*/\s*\d+",
+            r"Resets?\s+(?:(?:at|in|@)\s+\d|\d{1,2}:)",
+        ]
+
+        has_api_indicator = any(
+            re.search(pattern, output, re.IGNORECASE) for pattern in api_indicators
+        )
+        has_usage_data = any(
+            re.search(pattern, output, re.IGNORECASE) for pattern in usage_indicators
+        )
+        return has_api_indicator and not has_usage_data
 
     def _parse_usage_output(self, output: str) -> Tuple[float, Optional[datetime]]:
         """Parse 'claude usage' command output for percentage and reset time."""
