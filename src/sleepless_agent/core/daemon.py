@@ -125,9 +125,18 @@ class SleeplessAgent:
             base_path=str(self.config.agent.db_path.parent / "reports")
         )
 
+        bot_token = self.config.slack.bot_token
+        app_token = self.config.slack.app_token
+        if not bot_token or not app_token:
+            raise RuntimeError(
+                "Slack tokens are not configured. "
+                "Set SLACK_BOT_TOKEN and SLACK_APP_TOKEN as environment variables "
+                "(e.g. in a .env file in the project root)."
+            )
+
         self.bot = SlackBot(
-            bot_token=self.config.slack.bot_token,
-            app_token=self.config.slack.app_token,
+            bot_token=bot_token,
+            app_token=app_token,
             task_queue=self.task_queue,
             scheduler=self.scheduler,
             monitor=self.monitor,

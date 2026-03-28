@@ -1,3 +1,7 @@
+slack:
+  bot_token: ""
+  app_token: ""
+
 claude_code:
   binary_path: claude
   model: claude-sonnet-4-5-20250929
