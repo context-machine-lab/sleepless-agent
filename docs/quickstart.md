@@ -2,14 +2,16 @@
 
 Get Sleepless Agent running in 5 minutes! This guide covers the minimal setup needed to start processing tasks.
 
+> 💡 **Slack is optional.** You can use the `sle` CLI to submit tasks, check status, and start the daemon without any Slack configuration. Skip to [Step 3](#step-3-configure-environment) if you want to try it without Slack first.
+
 ## Prerequisites
 
 Before starting, ensure you have:
 
 - ✅ Python 3.11+ installed
 - ✅ Node.js 16+ installed
-- ✅ Slack workspace access
 - ✅ Claude Code CLI installed
+- ⬜ Slack workspace access (**optional**)
 
 ## Step 1: Install Claude Code CLI
 
@@ -35,7 +37,14 @@ cd sleepless-agent
 pip install -e .
 ```
 
-## Step 3: Quick Slack Setup
+> ⚠️ **Windows / WSL — `sle` not found?** After `pip install`, the `sle` script may not be on your `PATH`.  
+> Quick fix (WSL/Linux): `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc`  
+> Quick fix (Windows PowerShell): `$d = python -m site --user-scripts; [Environment]::SetEnvironmentVariable("PATH","$env:PATH;$d","User")` — then restart your terminal.  
+> Or just use a virtual environment (`python -m venv venv && venv/bin/activate`) to avoid PATH issues entirely.
+
+## Step 2b: (Optional) Set Up Slack
+
+If you want to submit tasks via Slack slash commands, set up a Slack app first. If you just want to use the `sle` CLI, skip this step.
 
 1. Visit [https://api.slack.com/apps](https://api.slack.com/apps)
 2. Click "Create New App" → "From scratch"
@@ -69,12 +78,14 @@ Features → Event Subscriptions → Enable Events → Subscribe to bot events:
 - Click "Install to Workspace"
 - Save the `xoxb-...` bot token
 
-## Step 4: Configure Environment
+See the [full Slack Setup Guide](guides/slack-setup.md) for a complete walkthrough.
+
+## Step 3: Configure Environment
 
 Create a `.env` file:
 
 ```bash
-# Required Slack tokens
+# Optional: only needed if you want Slack integration
 SLACK_BOT_TOKEN=xoxb-your-bot-token-here
 SLACK_APP_TOKEN=xapp-your-app-token-here
 
@@ -82,21 +93,30 @@ SLACK_APP_TOKEN=xapp-your-app-token-here
 AGENT_WORKSPACE=./workspace
 ```
 
-## Step 5: Start the Agent
+> If you don't have Slack tokens yet, you can leave them out and use the `sle` CLI directly. The daemon will start in CLI-only mode.
+
+## Step 4: Start the Agent
 
 ```bash
 sle daemon
 ```
 
-You should see:
+Without Slack tokens the agent starts in CLI-only mode — you won't see Slack log lines but task processing works normally. With Slack tokens configured you should see:
 ```
 2025-10-24 23:30:12 | INFO | Sleepless Agent starting...
 2025-10-24 23:30:12 | INFO | Slack bot started and listening for events
 ```
 
-## Step 6: Test Your Setup
+## Step 5: Test Your Setup
 
-In Slack, try these commands:
+**Without Slack** — use the CLI directly:
+
+```bash
+sle think "Research Python async patterns"
+sle check
+```
+
+**With Slack** — try these commands in your workspace:
 
 ```
 /think Research Python async patterns
@@ -105,7 +125,7 @@ In Slack, try these commands:
 
 The agent should acknowledge your task and show the queue status.
 
-### Try Chat Mode
+### Try Chat Mode (Slack only)
 
 Start an interactive session with Claude:
 
@@ -156,6 +176,11 @@ To end the session, type `exit` in the thread or use `/chat end`.
 - 📊 Learn about [Task Management](guides/project-management.md)
 
 ## Common Issues
+
+### `sle` command not found (Windows / WSL)?
+- **WSL/Linux**: `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc`
+- **Windows**: Run `python -m site --user-scripts` to find the Scripts dir, then add it to your `PATH` in System Settings → Environment Variables
+- Use a virtual environment to avoid this entirely: `python -m venv venv && source venv/bin/activate` (or `venv\Scripts\activate` on Windows)
 
 ### Agent not responding in Slack?
 - Verify Socket Mode is enabled

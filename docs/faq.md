@@ -20,6 +20,52 @@ Most Claude Code Pro subscriptions are underutilized, especially during night ho
 
 ## Setup & Installation
 
+### Is Slack required?
+
+**No — Slack is completely optional.** The `sle` CLI provides full functionality without any Slack configuration:
+
+```bash
+sle daemon       # Start the agent
+sle think "..."  # Queue a task
+sle check        # Check status
+sle report       # View reports
+```
+
+You only need Slack tokens (`SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN`) if you want to submit tasks via Slack slash commands (`/think`, `/check`, etc.) or use interactive chat mode. Without them, the daemon starts in CLI-only mode and everything still works.
+
+### Why doesn't `sle` work after `pip install` on Windows or WSL?
+
+After `pip install sleepless-agent`, the `sle` script is placed in a directory that may not be on your `PATH`.
+
+**WSL / Linux** — add `~/.local/bin` to `PATH`:
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+sle --version
+```
+
+**Windows (PowerShell)** — find and add the Scripts directory:
+```powershell
+$d = python -m site --user-scripts
+[Environment]::SetEnvironmentVariable("PATH","$env:PATH;$d","User")
+# Restart terminal, then:
+sle --version
+```
+
+**Recommended alternative** — use a virtual environment (avoids the issue on all platforms):
+```bash
+python -m venv venv
+# Windows: venv\Scripts\activate
+# Linux/macOS/WSL: source venv/bin/activate
+pip install sleepless-agent
+sle --version
+```
+
+You can also always invoke the CLI without modifying PATH:
+```bash
+python -m sleepless_agent.interfaces.cli --help
+```
+
 ### What are the system requirements?
 
 - Python 3.11 or higher
@@ -31,10 +77,6 @@ Most Claude Code Pro subscriptions are underutilized, especially during night ho
 ### Do I need a Claude API key?
 
 No! Sleepless Agent uses Claude Code CLI, which handles authentication through your Claude Code Pro subscription. You just need to run `claude login` once.
-
-### Can I use this without Slack?
-
-Yes! The CLI interface (`sle`) provides full functionality without Slack. Slack integration is optional but recommended for team collaboration.
 
 ### How do I update Sleepless Agent?
 

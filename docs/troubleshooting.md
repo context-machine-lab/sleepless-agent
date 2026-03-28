@@ -23,6 +23,73 @@ tail -50 workspace/data/agent.log | grep ERROR
 
 ## Common Issues
 
+### `sle` Command Not Found (Windows / WSL)
+
+#### Symptom
+
+```
+bash: sle: command not found
+```
+or
+```
+'sle' is not recognized as an internal or external command
+```
+
+#### Cause
+
+`pip install sleepless-agent` places the `sle` script in a directory that is not on your `PATH` by default (e.g. `~/.local/bin` on Linux/WSL, or `%APPDATA%\Python\PythonXX\Scripts` on Windows).
+
+#### Solutions
+
+**Virtual environment (recommended)**
+
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS / Linux / WSL:
+source venv/bin/activate
+
+pip install sleepless-agent
+sle --version
+```
+
+**WSL / Linux — add `~/.local/bin` to PATH**
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+sle --version
+```
+
+**Windows — add user Scripts directory to PATH (PowerShell)**
+
+```powershell
+$scriptsDir = python -m site --user-scripts
+[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;$scriptsDir", "User")
+# Restart your terminal, then:
+sle --version
+```
+
+**Run without modifying PATH**
+
+```bash
+python -m sleepless_agent.interfaces.cli --help
+```
+
+### Is Slack Required?
+
+**No.** Slack is an optional integration. The `sle` CLI works independently:
+
+```bash
+sle daemon      # Start the agent daemon
+sle think "..."  # Queue a task
+sle check        # Show system status
+sle report       # View task reports
+```
+
+You only need Slack tokens (`SLACK_BOT_TOKEN` / `SLACK_APP_TOKEN`) when you want to submit tasks via Slack slash commands. Without them the daemon starts in CLI-only mode and you can still run `sle daemon` to execute queued tasks.
+
 ### Agent Not Starting
 
 #### Symptom
