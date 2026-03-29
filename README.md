@@ -75,10 +75,12 @@ PR: https://github.com/user/repo/pull/123
 ## ⚙️ Prerequisites
 
 - Python 3.11+
-- Slack workspace admin access
 - Claude Code CLI installed (`npm install -g @anthropic-ai/claude-code`)
 - Git (for auto-commits)
 - gh CLI (optional, for PR automation)
+- Slack workspace admin access (**optional** — the `sle` CLI works without Slack)
+
+> 💡 **Slack is optional.** You can run all `sle` CLI commands without configuring Slack. Slack integration adds a convenient real-time interface for submitting tasks and checking status, but every feature is also available via the CLI.
 
 ## 🚀 Quick Start
 
@@ -97,7 +99,39 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -e .
 ```
 
-### 2. Setup Slack App
+> ⚠️ **Windows / WSL tip:** After `pip install`, the `sle` command might not be found if Python's `Scripts` directory is not on your `PATH`. See [Troubleshooting: `sle` not found](#windows--wsl-sle-command-not-found) below.
+
+### 2. Authenticate Claude Code (Required)
+
+```bash
+# Install the Claude Code CLI (requires Node.js)
+npm install -g @anthropic-ai/claude-code
+
+# Log in once (opens a browser)
+claude login
+
+# Verify
+claude --version
+```
+
+### 3. (Optional) Start without Slack
+
+Slack integration is **not required**. You can use the `sle` CLI directly:
+
+```bash
+# Start the daemon (no Slack needed)
+sle daemon
+
+# Queue a task
+sle think "Research async Python patterns"
+
+# Check status
+sle check
+```
+
+If you want Slack integration, continue with the setup below.
+
+### 4. Setup Slack App
 
 Visit https://api.slack.com/apps and create a new app:
 
@@ -138,7 +172,7 @@ Features > Event Subscriptions > Enable Events > Subscribe to bot events:
 - Install to workspace
 - Get bot token (starts with `xoxb-`)
 
-### 3. Configure Environment
+### 5. Configure Environment
 
 ```bash
 cp .env.example .env
@@ -151,7 +185,7 @@ Set:
 
 (Claude API key no longer needed - uses Claude Code CLI)
 
-### 4. Run
+### 6. Run
 
 ```bash
 sle daemon
@@ -163,6 +197,54 @@ You should see startup logs similar to:
 2025-10-24 23:30:12 | INFO     | sleepless_agent.runtime.daemon.run:178 Sleepless Agent starting...
 ```
 Logs are rendered with Rich for readability; set `SLEEPLESS_LOG_LEVEL=DEBUG` to increase verbosity.
+
+## 🖥️ Windows / WSL: `sle` Command Not Found
+
+If `sle` is not recognised after `pip install` on Windows or WSL, the Python `Scripts` directory is likely not on your `PATH`.
+
+**Windows (PowerShell / CMD)**
+
+```powershell
+# Find where pip installed the script
+python -m site --user-scripts
+
+# Add that directory to PATH permanently (PowerShell)
+$scriptsDir = python -m site --user-scripts
+[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;$scriptsDir", "User")
+
+# Or run sle directly with python -m
+python -m sleepless_agent.interfaces.cli --help
+```
+
+**WSL (Ubuntu / Debian)**
+
+```bash
+# Add the local bin directory to PATH
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify
+sle --version
+```
+
+**System-wide pip install (not recommended)**
+
+If you used `sudo pip install`, the script will be in `/usr/local/bin` which is normally already in PATH. However, prefer using a virtual environment or `pip install --user`.
+
+**Virtual environment (recommended)**
+
+Using a virtual environment avoids PATH issues on all platforms:
+
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS / Linux / WSL:
+source venv/bin/activate
+
+pip install sleepless-agent
+sle --version  # always works inside the venv
+```
 
 
 ## 💬 Slack Commands

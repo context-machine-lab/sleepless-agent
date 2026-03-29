@@ -17,7 +17,7 @@ This guide covers all installation methods and platform-specific setup instructi
 - **Claude Code CLI**: The AI execution engine
 - **Git**: For version control (optional but recommended)
 - **SQLite3**: Usually pre-installed with Python
-- **Slack Account**: With workspace admin access
+- **Slack Account**: With workspace admin access (**optional** — Slack adds a real-time interface but is not required to run `sle`)
 
 ## Installation Methods
 
@@ -116,6 +116,8 @@ pip install sleepless-agent
 npm install -g @anthropic-ai/claude-code
 pip install sleepless-agent
 ```
+
+> ⚠️ **`sle` not found after install?** See [Troubleshooting: `sle` command not found](#sle-command-not-found-windows--wsl) below.
 
 ## Claude Code CLI Setup
 
@@ -277,6 +279,61 @@ pip install -e . --upgrade
 ```
 
 ## Troubleshooting Installation
+
+### `sle` Command Not Found (Windows / WSL)
+
+#### Symptom
+
+After `pip install sleepless-agent` the terminal says `sle: command not found` (Linux/WSL) or `'sle' is not recognized` (Windows CMD/PowerShell).
+
+#### Cause
+
+`pip` installs the `sle` entry-point script into a `Scripts` (Windows) or `bin` (Linux/macOS) directory that may not be on your `PATH`.
+
+#### Solutions
+
+**1. Use a virtual environment (recommended for all platforms)**
+
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS / Linux / WSL:
+source venv/bin/activate
+
+pip install sleepless-agent
+sle --version  # Always works inside the venv
+```
+
+**2. WSL / Linux — add `~/.local/bin` to PATH**
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+sle --version
+```
+
+**3. Windows — add the user Scripts directory to PATH**
+
+```powershell
+# Find the Scripts directory
+python -m site --user-scripts
+# Example output: C:\Users\YourName\AppData\Roaming\Python\Python311\Scripts
+
+# Permanently add it (PowerShell, run as your user)
+$scriptsDir = python -m site --user-scripts
+[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;$scriptsDir", "User")
+# Restart your terminal, then:
+sle --version
+```
+
+**4. Run without adding to PATH**
+
+You can always invoke the CLI directly:
+
+```bash
+python -m sleepless_agent.interfaces.cli --help
+```
 
 ### Python Version Issues
 
